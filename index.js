@@ -5,7 +5,7 @@ import PinViewStyle from "./PinViewStyle.js"
 const ViewButton = ({
   activeOpacity,
   onButtonPress,
-  buttonSize = 60,
+  buttonSize = 89,
   text,
   customComponent,
   customViewStyle,
@@ -13,6 +13,7 @@ const ViewButton = ({
   accessibilityLabel,
   disabled,
   customTextStyle,
+  customRightButtonViewStyle,
 }) => {
   return (
     <TouchableOpacity
@@ -27,10 +28,12 @@ const ViewButton = ({
         style={[
           PinViewStyle.buttonView,
           customViewStyle,
-          { width: buttonSize, height: buttonSize, borderRadius: buttonSize / 2 },
+          !customComponent && { borderWidth: 0, borderBottomColor: '#fff', borderBottomWidth:1 },
         ]}>
-        {customComponent !== undefined ? (
-          customComponent
+        {customComponent ? (
+          <View style={[customRightButtonViewStyle, {borderColor:'tranparent', marginTop: 5}]}>
+          {customComponent}
+          </View>
         ) : (
           <Text style={[PinViewStyle.buttonText, customTextStyle]}>{text}</Text>
         )}
@@ -40,24 +43,24 @@ const ViewButton = ({
 }
 
 const ViewInput = ({
-  showInputText = false,
+  showInputText = true,
   inputTextStyle,
-  size = 40,
+  size = 61,
   customStyle,
   text,
-  inputFilledStyle = { backgroundColor: "#000" },
-  inputEmptyStyle = { backgroundColor: "#FFF" },
 }) => {
   if (showInputText) {
     return (
       <View
         style={[
           PinViewStyle.inputView,
-          customStyle,
-          { width: size, height: size, borderRadius: size / 2, alignItems: "center", justifyContent: "center" },
-          text !== undefined ? inputFilledStyle : inputEmptyStyle,
+          {
+            shadowOffset:{  width: 2,  height: 2,  },
+            shadowColor: '#000',
+            shadowOpacity: 0.8, 
+          }
         ]}>
-        <Text style={[PinViewStyle.inputText, inputTextStyle]}>{text}</Text>
+        <Text style={[PinViewStyle.inputText, {color: 'blue'}]}>{text}</Text>
       </View>
     )
   } else {
@@ -66,8 +69,7 @@ const ViewInput = ({
         style={[
           PinViewStyle.inputView,
           customStyle,
-          { width: size, height: size, borderRadius: size / 2 },
-          text !== undefined ? inputFilledStyle : inputEmptyStyle,
+          { width: size, height: size, borderRadius: 6, backgroundColor: '#fff' },
         ]}
       />
     )
@@ -100,7 +102,6 @@ const PinView = React.forwardRef(
       inputTextStyle,
       inputSize,
       disabled,
-
       customLeftButton,
       customRightButton,
       customRightAccessibilityLabel,
@@ -109,6 +110,9 @@ const PinView = React.forwardRef(
       customRightButtonViewStyle,
       customLeftButtonDisabled,
       customRightButtonDisabled,
+      resendStyle,
+      resendText,
+      resendButtonSelection,
     },
     ref
   ) => {
@@ -124,6 +128,12 @@ const PinView = React.forwardRef(
           setInput("")
         }
       },
+    }
+
+    const clear = () => {
+      if (input.length > 0) {
+        setInput(input.slice(0, -1))
+      }
     }
 
     const onButtonPressHandle = (key, value) => {
@@ -142,6 +152,7 @@ const PinView = React.forwardRef(
 
     return (
       <View style={[PinViewStyle.pinView, style]}>
+        <View style={{alignItems: 'center',justifyContent:'center'}}>
         <View style={[PinViewStyle.inputContainer, inputAreaStyle]}>
           {Array.apply(null, { length: pinLength }).map((e, i) => (
             <ViewInput
@@ -156,7 +167,11 @@ const PinView = React.forwardRef(
             />
           ))}
         </View>
-        <View style={[PinViewStyle.buttonAreaContainer, buttonAreaStyle]}>
+        <TouchableOpacity onPress={resendButtonSelection}>
+        <Text style={resendStyle}>{resendText}</Text>
+        </TouchableOpacity>
+        </View>
+        <View style={[PinViewStyle.buttonAreaContainer]}>
           <ViewButton
             disabled={disabled}
             accessible={accessible}
@@ -276,7 +291,7 @@ const PinView = React.forwardRef(
               accessible={accessible}
               activeOpacity={activeOpacity}
               accessibilityLabel={customRightAccessibilityLabel}
-              onButtonPress={() => onButtonPress("custom_right")}
+              onButtonPress={() => onButtonPress("custom_left")}
               customViewStyle={customRightButtonViewStyle}
               customComponent={customRightButton}
             />
